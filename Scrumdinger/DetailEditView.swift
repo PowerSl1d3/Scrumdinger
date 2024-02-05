@@ -1,0 +1,62 @@
+//
+//  DetailEditView.swift
+//  Scrumdinger
+//
+//  Created by Oleg Aksenenko on 03.02.2024.
+//
+
+import SwiftUI
+
+struct DetailEditView: View {
+    @State private var scrum = DailyScrum.emptyScrum
+    @State private var newAttendeeName = ""
+
+    var body: some View {
+        Form {
+            Section {
+                TextField("Title", text: $scrum.title)
+                HStack {
+                    Slider(value: $scrum.lengthInMinutesAsDouble, in: 5...30, step: 1) {
+                        Text("Length")
+                    }
+                    .accessibilityValue("\(scrum.lengthInMinutes) minutes")
+                    Spacer()
+                    Text("\(scrum.lengthInMinutes) minutes")
+                        .accessibilityHidden(true)
+                }
+            } header: {
+                Text("Meeting info")
+            }
+            Section {
+                ForEach(scrum.attendees) { attendee in
+                    Text(attendee.name)
+                }
+                .onDelete { indices in
+                    scrum.attendees.remove(atOffsets: indices)
+                }
+                HStack {
+                    TextField("New attendee", text: $newAttendeeName)
+                    Button(action: {
+                        withAnimation {
+                            let attendee = DailyScrum.Attendee(name: newAttendeeName)
+                            scrum.attendees.append(attendee)
+                            newAttendeeName = ""
+                        }
+                    }) {
+                        Image(systemName: "plus.circle.fill")
+                            .accessibilityLabel("Add attendee")
+                    }
+                    .disabled(newAttendeeName.isEmpty)
+                }
+            } header: {
+                Text("Attendees")
+            }
+        }
+    }
+}
+
+struct DetailEditView_Preview: PreviewProvider {
+    static var previews: some View {
+        DetailEditView()
+    }
+}
